@@ -25,12 +25,9 @@ public class ReportGenerator {
 
         // we send fix number of requests but in case there are timeouts or IO exceptions,
         // we should not hardcode the list size below
-        System.out.println("10th percentile: " + latencies.get((int) Math.round(0.10 * latencies.size())) + " ms");
-        System.out.println("15th percentile: " + latencies.get((int) Math.round(0.15 * latencies.size())) + " ms");
-        System.out.println("50th percentile: " + latencies.get((int) Math.round(0.50 * latencies.size())) + " ms");
-        System.out.println("90th percentile: " + latencies.get((int) Math.round(0.90 * latencies.size())) + " ms");
-        System.out.println("95th percentile: " + latencies.get((int) Math.round(0.95 * latencies.size())) + " ms");
-        System.out.println("99th percentile: " + latencies.get((int) Math.round(0.99 * latencies.size())) + " ms");
+        for (float i : new float[]{0.10f, 0.15f, 0.50f, 0.90f, 0.95f, 0.99f}) {
+            System.out.println((int) (i * 100) + "th percentile: " + latencies.get((int) Math.round(i * latencies.size())) + " ms");
+        }
 
         System.out.println("------------------------------------------");
         long sum = 0;
