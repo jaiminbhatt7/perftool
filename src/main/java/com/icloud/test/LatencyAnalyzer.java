@@ -8,11 +8,11 @@ import com.icloud.test.utils.ReportGenerator;
  */
 public class LatencyAnalyzer {
 
-    public static void main(String[] argv) {
+    public static void main(String[] argv) throws InterruptedException {
         if (argv.length != 2) {
             throw new IllegalArgumentException("Invalid input");
         }
-        Executor executor = new Executor();
-        ReportGenerator.printReport(argv[0], executor.runConcurrentRequests(argv[0], Integer.valueOf(argv[1])));
+        Executor executor = new Executor(argv[0], Integer.valueOf(argv[1]));
+        ReportGenerator.printReport(argv[0], executor.run());
     }
 }

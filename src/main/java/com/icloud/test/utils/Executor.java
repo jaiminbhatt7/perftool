@@ -3,8 +3,9 @@ package com.icloud.test.utils;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,30 +16,32 @@ import java.util.concurrent.Executors;
  */
 public class Executor {
 
+    private String url;
     // Thread safe array list to collect response times
     private List<Long> latencyCollector = new CopyOnWriteArrayList<>();
-    private static final Random RANDOM = new Random();
+    private ExecutorService executor;
+
+    public Executor(String url, int numOfConcurrentRequests) {
+        this.url = url;
+        this.executor = Executors.newFixedThreadPool(numOfConcurrentRequests);
+    }
 
     /**
-     * This method will send 100 with {@code numOfConcurrentRequests} concurrency
+     * This method will send 100 requests with {@code numOfConcurrentRequests} concurrency
      * to the {@code targetUrl} and return list of response time measured for each successful
      * request. Unsuccessful requests (timeouts, IO errors etc) will be ignored
      *
-     * @param targetUrl URL to measure response time
-     * @param numOfConcurrentRequests number of threads making requests in parallel
      * @return List of response times
+     * @throws InterruptedException if the threads are interrupted
      */
-    public List<Long> runConcurrentRequests(String targetUrl, int numOfConcurrentRequests) {
-
-        // service to send asynchronous concurrent requests
-        ExecutorService executor = Executors.newFixedThreadPool(numOfConcurrentRequests);
+    public List<Long> run() throws InterruptedException {
+        List<Callable<Void>> callables = new ArrayList<>();
 
         // limit of 100 as defined by the problem statement
         for (int i = 0; i < 100; i++) {
-            Runnable newThread = new ThreadRunner(targetUrl);
-            executor.execute(newThread);
+            callables.add(getCallable());
         }
-
+        executor.invokeAll(callables);
         executor.shutdown();
         while (!executor.isTerminated()) {
             // wait till all the threads are terminated
@@ -46,34 +49,20 @@ public class Executor {
         return latencyCollector;
     }
 
-
-    /**
-     * The class implements {@code Runnable} which collects the latency
-     * for every request
-     */
-    private class ThreadRunner implements Runnable {
-
-        private String targetUrl;
-
-        public ThreadRunner(String targetUrl) {
-            this.targetUrl = targetUrl;
-        }
-
-        public void run() {
+    private Callable<Void> getCallable() {
+        return () -> {
             try {
-                // adding randomness in execution order of each thread
-                Thread.sleep(RANDOM.nextInt(100));
-
-                URL target = new URL(targetUrl);
+                URL target = new URL(url);
                 HttpURLConnection connection = (HttpURLConnection) target.openConnection();
                 connection.setRequestMethod("GET");
                 long startTime = System.currentTimeMillis();
                 connection.connect();
                 long endTime = System.currentTimeMillis();
                 latencyCollector.add(endTime - startTime);
-            } catch (IOException | InterruptedException ignored) {
+            } catch (IOException ignored) {
             }
-        }
+            return null;
+        };
     }
 
 }
