@@ -23,6 +23,8 @@ public class ReportGenerator {
         System.out.println("Report for " + url);
         System.out.println("------------------------------------------");
 
+        // we send fix number of requests but in case there are timeouts or IO exceptions,
+        // we should not hardcode the list size below
         System.out.println("10th percentile: " + latencies.get((int) Math.round(0.10 * latencies.size())) + " ms");
         System.out.println("15th percentile: " + latencies.get((int) Math.round(0.15 * latencies.size())) + " ms");
         System.out.println("50th percentile: " + latencies.get((int) Math.round(0.50 * latencies.size())) + " ms");

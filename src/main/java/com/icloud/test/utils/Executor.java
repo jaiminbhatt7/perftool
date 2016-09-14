@@ -20,8 +20,8 @@ public class Executor {
     private static final Random RANDOM = new Random();
 
     /**
-     * This method will send {@code numOfConcurrentRequests * numOfConcurrentRequests}
-     * to the {@code targetUrl} and return list of repsonse time measured for each successful
+     * This method will send 100 with {@code numOfConcurrentRequests} concurrency
+     * to the {@code targetUrl} and return list of response time measured for each successful
      * request. Unsuccessful requests (timeouts, IO errors etc) will be ignored
      *
      * @param targetUrl URL to measure response time
